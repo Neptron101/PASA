@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "862044482298",
+    "firebase_url": "https://pasa-d00ab.firebaseio.com",
+    "project_id": "pasa-d00ab",
+    "storage_bucket": "pasa-d00ab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:862044482298:android:a0a5f2e39ff489a4",
+        "android_client_info": {
+          "package_name": "com.bikinmaharjan.pasa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "862044482298-v5405g6h6d552he7s4gkbn7hki32q2gh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bikinmaharjan.pasa",
+            "certificate_hash": "d2615482b4c8340fe4fcb56faa0b58caa4fa1357"
+          }
+        },
+        {
+          "client_id": "862044482298-48rodasssv38hqkijoqndr2ucitcs2pe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0lJWtWcK2bCfuzv1hn0DPVWFZc3_fh7Y"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "862044482298-48rodasssv38hqkijoqndr2ucitcs2pe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
