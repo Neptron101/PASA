@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "862044482298-b2carc8g933fi7045tu0sp7mga5kvk4r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bikinmaharjan.pasa",
+            "certificate_hash": "3a2e14a061af7aa1ab1e869ae9865ed290b84c82"
+          }
+        },
+        {
           "client_id": "862044482298-v5405g6h6d552he7s4gkbn7hki32q2gh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

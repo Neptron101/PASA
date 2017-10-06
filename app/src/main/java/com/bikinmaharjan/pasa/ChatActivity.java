@@ -3,16 +3,25 @@ package com.bikinmaharjan.pasa;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,17 +29,29 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.ActionCodeResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
 
 public class ChatActivity extends AppCompatActivity {
 
     private static final int SIGN_IN_REQUEST_CODE = 0;
+
     private Button signOutBtn;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private StorageReference mStorage;
+
+    public static final int GALLERY_INTENT = 2;
 
 
     private FirebaseListAdapter<ChatMessage> adapter;
@@ -48,9 +69,11 @@ public class ChatActivity extends AppCompatActivity {
 
 
         mAuth = FirebaseAuth.getInstance();
+        mStorage = FirebaseStorage.getInstance().getReference();
+
 
         if(FirebaseAuth.getInstance().getCurrentUser() == null) {
-            // Start sign in/sign up activity
+
             startActivityForResult(
                     AuthUI.getInstance()
                             .createSignInIntentBuilder()
@@ -58,8 +81,7 @@ public class ChatActivity extends AppCompatActivity {
                             SIGN_IN_REQUEST_CODE
             );
         } else {
-            // User is already signed in. Therefore, display
-            // a welcome Toast
+
             Toast.makeText(this,
                     "Welcome " + FirebaseAuth.getInstance()
                             .getCurrentUser()
@@ -67,22 +89,21 @@ public class ChatActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG)
                     .show();
 
-            // Load chat room contents
+
             displayChatMessages();
 
 
         }
 
-        FloatingActionButton fab =
-                (FloatingActionButton)findViewById(R.id.fab);
+        FloatingActionButton sendMessageFab =
+                (FloatingActionButton)findViewById(R.id.sendfab);
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        sendMessageFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 EditText input = (EditText)findViewById(R.id.input);
 
-                // Read the input field and push a new instance
-                // of ChatMessage to the Firebase database
+
                 FirebaseDatabase.getInstance()
                         .getReference()
                         .push()
@@ -92,8 +113,20 @@ public class ChatActivity extends AppCompatActivity {
                                         .getDisplayName())
                         );
 
-                // Clear the input
+
                 input.setText("");
+            }
+        });
+
+        FloatingActionButton sendImageFab =
+                (FloatingActionButton) findViewById(R.id.galleryfab);
+
+        sendImageFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleGalleryOpenBtn(view);
+
+
             }
         });
 
@@ -130,14 +163,12 @@ public class ChatActivity extends AppCompatActivity {
     public void onBackPressed() {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Sign Out?")
-                .setMessage("Are you sure you want to sign out from PASA")
+                .setTitle("Close PASA?")
+                .setMessage("Are you sure you want to close PASA")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        FirebaseAuth.getInstance().signOut();
-                        startActivity(new Intent(ChatActivity.this , MainActivity.class));
                         finish();
                     }
 
@@ -206,24 +237,93 @@ public class ChatActivity extends AppCompatActivity {
         ListView listOfMessages = (ListView)findViewById(R.id.list_of_messages);
 
         adapter = new FirebaseListAdapter<ChatMessage>(this, ChatMessage.class,
-                R.layout.message, FirebaseDatabase.getInstance().getReference()) {
+                R.layout.adapter_chat, FirebaseDatabase.getInstance().getReference()) {
             @Override
             protected void populateView(View v, ChatMessage model, int position) {
-                // Get references to the views of message.xml
-                TextView messageText = (TextView)v.findViewById(R.id.message_text);
-                TextView messageUser = (TextView)v.findViewById(R.id.message_user);
-                TextView messageTime = (TextView)v.findViewById(R.id.message_time);
 
-                // Set their text
+                TextView messageText = (TextView)v.findViewById(R.id.messageText);
+                TextView messageUser = (TextView)v.findViewById(R.id.messageUser);
+                TextView messageTime = (TextView)v.findViewById(R.id.messageTime);
+                ImageView messageImage = (ImageView)v.findViewById(R.id.messageImage);
+
                 messageText.setText(model.getMessageText());
                 messageUser.setText(model.getMessageUser());
 
-                // Format the date before showing it
+
                 messageTime.setText(DateFormat.format("dd-MM-yyyy (HH:mm:ss)",
                         model.getMessageTime()));
+
+                Picasso.with(ChatActivity.this).load(model.getImageURL()).fit().centerCrop().into(messageImage);
+
+
             }
         };
 
         listOfMessages.setAdapter(adapter);
+
     }
+
+    public void handleGalleryOpenBtn(View view){
+
+
+        Intent galleryPickerIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryPickerIntent, GALLERY_INTENT);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        Log.i("Gallery Image retrieved", "Test to check if the gallery image is retrieved");
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+            if (requestCode == GALLERY_INTENT && resultCode==RESULT_OK){
+
+                    Log.i("ChatActivity", "Case 1");
+                    EditText input = (EditText)findViewById(R.id.input);
+                    final Uri selectedImage = data.getData();
+
+                    StorageReference filepath = mStorage.child("Photos").child(selectedImage.getLastPathSegment());
+
+                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+
+                    filepath.putFile(selectedImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(ChatActivity.this, "Uploaded to Storage", Toast.LENGTH_SHORT).show();
+
+                            if (taskSnapshot!=null){
+                                String imageUrl = taskSnapshot.getDownloadUrl().toString();
+                                final ChatMessage message = new ChatMessage(imageUrl);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+
+
+    }
+
+
 }

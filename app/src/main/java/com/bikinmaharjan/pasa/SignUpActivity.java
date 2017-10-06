@@ -5,11 +5,13 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -66,14 +68,7 @@ public class SignUpActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
 
-                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                            if(user!=null){
-                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                        .setDisplayName("Batman").build();
-                                user.updateProfile(profileUpdates);
-                                Intent intent = new Intent(SignUpActivity.this, ChatActivity.class);
-                                startActivity(intent);
-                            }
+
 
                             if (!task.isSuccessful()){
 
@@ -83,6 +78,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                             }
                             else{
+                                createUserName();
                                 Toast.makeText(SignUpActivity.this, "SignUp Successful!", Toast.LENGTH_LONG).show();
                             }
 
@@ -92,4 +88,25 @@ public class SignUpActivity extends AppCompatActivity {
 
 
     }
+
+    private void createUserName() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null){
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(sUserNameET.getText().toString().trim()).build();
+            user.updateProfile(profileUpdates)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+                        Log.d("Test", "Username is Created");
+                    }
+                }
+            });
+            Intent intent = new Intent(SignUpActivity.this, ChatActivity.class);
+            startActivity(intent);
+        }
+    }
+
+
 }

@@ -77,6 +77,35 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        forgotPswrdBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String emailAddress = emailET.getText().toString();
+
+                if (!TextUtils.isEmpty(emailAddress)){
+                    FirebaseAuth.getInstance().sendPasswordResetEmail(emailAddress)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()){
+                                        Toast.makeText(MainActivity.this, "Email Sent to your Email address", Toast.LENGTH_SHORT).show();
+
+                                    }
+                                    else{
+                                        Toast.makeText(MainActivity.this, "Invalid Email address", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                }
+
+                else {
+                    Toast.makeText(MainActivity.this, "Please enter email address and Try again!", Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        });
+
 
 
 
@@ -125,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         String password = pswrdET.getText().toString();
 
         if(TextUtils.isEmpty(email)|| TextUtils.isEmpty(password)){
-            Toast.makeText(MainActivity.this, "Enter in all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Enter in all fields and Try Again!", Toast.LENGTH_SHORT).show();
 
         }
 
