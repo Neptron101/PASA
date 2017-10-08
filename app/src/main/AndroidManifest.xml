@@ -9,7 +9,7 @@
 
 
     <application
-        android:name=".FireApp"
+
         android:allowBackup="true"
         android:icon="@mipmap/user_1"
         android:label="@string/app_name"
