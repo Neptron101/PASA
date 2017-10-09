@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@mipmap/background"
     android:padding="15dp"
-    tools:context="com.bikinmaharjan.pasa.SignUpActivity">
+    tools:context="com.bikinmaharjan.pasa.Activity.SignUpActivity">
 
     <Button
         android:id="@+id/sSignUpBtn"

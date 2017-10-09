@@ -9,7 +9,7 @@
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
     android:paddingTop="10dp"
-    tools:context="com.bikinmaharjan.pasa.ChatActivity">
+    tools:context="com.bikinmaharjan.pasa.Activity.ChatActivity">
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/sendfab"
